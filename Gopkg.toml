@@ -272,3 +272,7 @@
 [[override]]
   name = "contrib.go.opencensus.io/exporter/ocagent"
   version = "0.4.12"
+
+[[override]]
+  name = "github.com/joejulian/gspdy"
+  branch = "hack"

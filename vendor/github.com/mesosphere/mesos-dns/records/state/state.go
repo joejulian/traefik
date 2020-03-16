@@ -2,10 +2,12 @@ package state
 
 import (
 	"bytes"
-	"github.com/mesos/mesos-go/upid"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/mesos/mesos-go/upid"
+	"github.com/mesosphere/mesos-dns/logging"
 )
 
 // Resources holds resources as defined in the /state.json Mesos HTTP endpoint.
@@ -28,8 +30,16 @@ func (r Resources) Ports() []string {
 	for _, port := range mports {
 		tmp := strings.TrimSpace(port)
 		pz := strings.Split(tmp, "-")
-		lo, _ := strconv.Atoi(pz[0])
-		hi, _ := strconv.Atoi(pz[1])
+		lo, err := strconv.Atoi(pz[0])
+		if err != nil {
+			logging.Error.Println(err)
+			continue
+		}
+		hi, err := strconv.Atoi(pz[1])
+		if err != nil {
+			logging.Error.Println(err)
+			continue
+		}
 
 		for t := lo; t <= hi; t++ {
 			yports = append(yports, strconv.Itoa(t))
@@ -50,7 +60,6 @@ type Status struct {
 	State           string          `json:"state"`
 	Labels          []Label         `json:"labels,omitempty"`
 	ContainerStatus ContainerStatus `json:"container_status,omitempty"`
-	Healthy         *bool          	`json:"healthy"`
 }
 
 // ContainerStatus holds container metadata as defined in the /state.json
@@ -84,8 +93,7 @@ type Task struct {
 	Resources     `json:"resources"`
 	DiscoveryInfo DiscoveryInfo `json:"discovery"`
 
-	SlaveIP string  `json:"-"`
-	Labels  []Label `json:"labels,omitempty"`
+	SlaveIP string `json:"-"`
 }
 
 // HasDiscoveryInfo return whether the DiscoveryInfo was provided in the state.json
@@ -253,14 +261,11 @@ type DiscoveryInfo struct {
 	Location    string `json:"location,omitempty"`
 	Environment string `json:"environment,omitempty"`
 	Labels      struct {
-			    Labels []Label `json:"labels"`
-		    } `json:"labels"`
-	Ports Ports `json:"ports"`
-}
-
-// Ports holds a list of DiscoveryPort
-type Ports struct {
-	DiscoveryPorts []DiscoveryPort `json:"ports"`
+		Labels []Label `json:"labels"`
+	} `json:"labels"`
+	Ports struct {
+		DiscoveryPorts []DiscoveryPort `json:"ports"`
+	} `json:"ports"`
 }
 
 // DiscoveryPort holds a port for a task defined in the /state.json Mesos HTTP endpoint.

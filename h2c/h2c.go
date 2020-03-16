@@ -52,31 +52,34 @@ func (s Server) Serve(l net.Listener) error {
 	if originalHandler == nil {
 		originalHandler = http.DefaultServeMux
 	}
-	// s.Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	if r.Method == "PRI" && r.URL.Path == "*" && r.Proto == "HTTP/2.0" {
-	// 		if http2VerboseLogs {
-	// 			log.Debugf("Attempting h2c with prior knowledge.")
-	// 		}
-	// 		conn, err := initH2CWithPriorKnowledge(w)
-	// 		if err != nil {
-	// 			if http2VerboseLogs {
-	// 				log.Debugf("Error h2c with prior knowledge: %v", err)
-	// 			}
-	// 			return
-	// 		}
-	// 		defer conn.Close()
-	// 		h2cSrv := &http2.Server{}
-	// 		h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
-	// 		return
-	// 	}
-	// 	if conn, err := h2cUpgrade(w, r); err == nil {
-	// 		defer conn.Close()
-	// 		h2cSrv := &http2.Server{}
-	// 		h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
-	// 		return
-	// 	}
-	// 	originalHandler.ServeHTTP(w, r)
-	// })
+
+	// JOEJULIAN all the code below was commented out
+	s.Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "PRI" && r.URL.Path == "*" && r.Proto == "HTTP/2.0" {
+			if http2VerboseLogs {
+				log.Debugf("Attempting h2c with prior knowledge.")
+			}
+			conn, err := initH2CWithPriorKnowledge(w)
+			if err != nil {
+				if http2VerboseLogs {
+					log.Debugf("Error h2c with prior knowledge: %v", err)
+				}
+				return
+			}
+			defer conn.Close()
+			h2cSrv := &http2.Server{}
+			h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
+			return
+		}
+		if conn, err := h2cUpgrade(w, r); err == nil {
+			defer conn.Close()
+			h2cSrv := &http2.Server{}
+			h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
+			return
+		}
+		originalHandler.ServeHTTP(w, r)
+	})
+
 	return s.Server.Serve(l)
 }
 

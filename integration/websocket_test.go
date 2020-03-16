@@ -465,6 +465,7 @@ func (s *WebsocketSuite) TestSSLhttp2(c *check.C) {
 	}))
 
 	ts.TLS = &tls.Config{}
+	ts.TLS.NextProtos = append(ts.TLS.NextProtos, `spdy`)
 	ts.TLS.NextProtos = append(ts.TLS.NextProtos, `h2`)
 	ts.TLS.NextProtos = append(ts.TLS.NextProtos, `http/1.1`)
 	ts.StartTLS()

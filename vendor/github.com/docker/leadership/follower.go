@@ -3,7 +3,7 @@ package leadership
 import (
 	"errors"
 
-	"github.com/abronan/valkeyrie/store"
+	"github.com/docker/libkv/store"
 )
 
 // Follower can follow an election in real-time and push notifications whenever
@@ -51,7 +51,7 @@ func (f *Follower) follow() {
 	defer close(f.leaderCh)
 	defer close(f.errCh)
 
-	ch, err := f.client.Watch(f.key, f.stopCh, nil)
+	ch, err := f.client.Watch(f.key, f.stopCh)
 	if err != nil {
 		f.errCh <- err
 	}

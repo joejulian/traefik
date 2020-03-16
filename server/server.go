@@ -441,7 +441,9 @@ func (s *Server) createTLSConfig(entryPointName string, tlsOption *traefiktls.TL
 	s.serverEntryPoints[entryPointName].certs.DynamicCerts.Set(make(map[string]*tls.Certificate))
 
 	// ensure http2 enabled
-	config.NextProtos = []string{"http/1.1", tlsalpn01.ACMETLS1Protocol}
+	// JOEJULIAN: Removed below
+	//config.NextProtos = []string{"h2", "http/1.1", tlsalpn01.ACMETLS1Protocol}
+	config.NextProtos = []string{"spdy", "h2", "http/1.1", tlsalpn01.ACMETLS1Protocol}
 
 	if len(tlsOption.ClientCAFiles) > 0 {
 		log.Warnf("Deprecated configuration found during TLS configuration creation: %s. Please use %s (which allows to make the CA Files optional).", "tls.ClientCAFiles", "tls.ClientCA.files")
