@@ -443,7 +443,7 @@ func (s *Server) createTLSConfig(entryPointName string, tlsOption *traefiktls.TL
 	// ensure http2 enabled
 	// JOEJULIAN: Removed below
 	//config.NextProtos = []string{"h2", "http/1.1", tlsalpn01.ACMETLS1Protocol}
-	config.NextProtos = []string{"spdy", "h2", "http/1.1", tlsalpn01.ACMETLS1Protocol}
+	config.NextProtos = []string{"spdy/3.1", "h2", "http/1.1", tlsalpn01.ACMETLS1Protocol}
 
 	if len(tlsOption.ClientCAFiles) > 0 {
 		log.Warnf("Deprecated configuration found during TLS configuration creation: %s. Please use %s (which allows to make the CA Files optional).", "tls.ClientCAFiles", "tls.ClientCA.files")
@@ -527,7 +527,8 @@ func (s *Server) startServer(serverEntryPoint *serverEntryPoint) {
 
 	var err error
 	if serverEntryPoint.httpServer.TLSConfig != nil {
-		err = serverEntryPoint.httpServer.ServeTLS(serverEntryPoint.listener, "", "")
+		err = serverEntryPoint.httpServer.ServeTLSViaSPDYorHTTP2(serverEntryPoint.listener)
+		//err = serverEntryPoint.httpServer.ServeTLS(serverEntryPoint.listener, "", "")
 	} else {
 		err = serverEntryPoint.httpServer.Serve(serverEntryPoint.listener)
 	}

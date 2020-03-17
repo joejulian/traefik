@@ -11,6 +11,7 @@ package h2c
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
@@ -22,8 +23,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/amahi/spdy"
+	sspdy "github.com/SlyMarbo/spdy"
+	//shykesspdy "github.com/shykes/spdy-go"
 	"github.com/containous/traefik/log"
-
 	"golang.org/x/net/http/httpguts"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/hpack"
@@ -55,6 +58,9 @@ func (s Server) Serve(l net.Listener) error {
 
 	// JOEJULIAN all the code below was commented out
 	s.Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// if connection is http2 then serve the connection
+		log.Debugf("AE: The protocol request is %s ", r.Proto)
+
 		if r.Method == "PRI" && r.URL.Path == "*" && r.Proto == "HTTP/2.0" {
 			if http2VerboseLogs {
 				log.Debugf("Attempting h2c with prior knowledge.")
@@ -71,16 +77,78 @@ func (s Server) Serve(l net.Listener) error {
 			h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
 			return
 		}
-		if conn, err := h2cUpgrade(w, r); err == nil {
+		// if connection is spdy then serrve the connection
+		if strings.HasPrefix(strings.ToLower(r.Proto), "spdy")  {
+			log.Debugf("AE: using spdy connection protocol")
+			// create a connection
+			hijacker, ok := w.(http.Hijacker)
+			if !ok {
+				log.Debugf("error: spdy could not hijack the connection")
+				return
+			}
+			hijackedConn, rw, err := hijacker.Hijack()
+			if err != nil {
+				log.Debugf("error: spdy could not hijack the connection: %s", err)
+				return
+			}
+			conn := &rwConn{
+				Conn:      hijackedConn,
+				Reader:    io.MultiReader(rw),
+				BufWriter: newSettingsAckSwallowWriter(rw.Writer),
+			}
+
 			defer conn.Close()
-			h2cSrv := &http2.Server{}
-			h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
+			session := spdy.NewServerSession(conn, &http.Server{})
+			session.Serve()
 			return
 		}
+		//log.Debugf("AE: upgrading to http2")
+		// AE DO NOT UPGRADE TO H2
+		// if connection is simply http, then upgrade the connection to http2
+		//if conn, err := h2cUpgrade(w, r); err == nil {
+		//	defer conn.Close()
+		//	h2cSrv := &http2.Server{}
+		//	h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
+		//	return
+		//}
 		originalHandler.ServeHTTP(w, r)
 	})
 
 	return s.Server.Serve(l)
+}
+
+// AE This is how we bypass the original TLS route
+func (s Server) ServeTLSViaSPDYorHTTP2(l net.Listener) error {
+	log.Debugf("AE: Serving TLS, checking if spdy or http")
+	originalHandler := s.Server.Handler
+	if originalHandler == nil {
+		originalHandler = http.DefaultServeMux
+	}
+
+	config := s.TLSConfig.Clone()
+	config.NextProtos = []string{"spdy/3.1"}
+
+
+	if s.TLSNextProto == nil {
+		s.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
+	}
+	s.TLSNextProto["spdy/3.1"] = func(s *http.Server, tlsConn *tls.Conn, handler http.Handler) {
+		conn, err := sspdy.NewServerConn(tlsConn, s, 3, 1)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		conn.Run()
+	}
+
+	tslListener := tls.NewListener(l, config)
+
+	log.Debugf("AE: serving spdy")
+
+	return s.Serve(tslListener)
+
+	//return sspdy.ListenAndServeTLS("","","",originalHandler)
+	//return nil
 }
 
 // initH2CWithPriorKnowledge implements creating a h2c connection with prior

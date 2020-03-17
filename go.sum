@@ -75,6 +75,8 @@ github.com/abronan/valkeyrie v0.0.0-20171113095143-063d875e3c5f h1:HTH6xC5RMbjwE
 github.com/abronan/valkeyrie v0.0.0-20171113095143-063d875e3c5f/go.mod h1:oqs1pp6MTXt4fov7I9OsfvD+jn4n9Q74Yt/oRGMakDM=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v0.7.4 h1:LNhFHR2IQSpk7wdEVoEgRSaV2jcvKdgRojp7//21jqI=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v0.7.4/go.mod h1:eXWHAoXwqXM7CFZpE8zdz9OVRk4G8BCR1mDwYvIyFsA=
+github.com/alejandroEsc/spdy v0.0.0-20200317064415-01a02f0eb389 h1:M6nxuyyLlRXv9/SfbouVzSt5P5lW6S1Z6GwWtRiqFYw=
+github.com/alejandroEsc/spdy v0.0.0-20200317064415-01a02f0eb389/go.mod h1:ZvtZQ6PE8yU6efH2QvpoqFDC0CNs2/vH5Q3tAKTtvU0=
 github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190805094258-26f0a5c2d5dc h1:VdcJKnh51nGSLaagacV+NE8PHARx6IKUSAcSjf/hkvQ=
 github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190805094258-26f0a5c2d5dc/go.mod h1:myCDvQSzCW+wB1WAlocEru4wMGJxy+vlxHdhegi1CDQ=
 github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20190307165228-86c17b95fcd5/go.mod h1:T/Aws4fEfogEE9v+HPhhw+CntffsBHJ8nXQCwKr0/g8=

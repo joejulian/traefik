@@ -26,6 +26,7 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20160726150825-5bd2802263f2 // indirect
 	github.com/Shopify/sarama v1.19.0 // indirect
 	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
+	github.com/SlyMarbo/spdy v0.0.0-00010101000000-000000000000
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/abbot/go-http-auth v0.4.0
 	github.com/abronan/valkeyrie v0.0.0-20171113095143-063d875e3c5f
@@ -219,8 +220,11 @@ require (
 )
 
 replace (
+	github.com/SlyMarbo/spdy => github.com/alejandroEsc/spdy v0.0.0-20200317064415-01a02f0eb389
 	github.com/docker/leadership => github.com/containous/leadership v0.1.1-0.20180123135645-a2e096d9fe0a
+	//github.com/gorilla/websocket v1.4.0 => github.com/joejulian/gspdy v1.4.1
 	github.com/h2non/gock => gopkg.in/h2non/gock.v1 v1.0.15
-	//	github.com/vulcand/oxy => github.com/alejandroEsc/oxy v1.0.1-0.20200313214606-19f365c96633
 	github.com/mesosphere/mesos-dns => github.com/containous/mesos-dns v0.5.3-rc1.0.20160623212649-b47dc4c19f21
+//	github.com/vulcand/oxy => github.com/alejandroEsc/oxy v1.0.1-0.20200313214606-19f365c96633
+//  github.com/vulcand/oxy => github.com/joejulian/oxy v1.0.1-0.20200316183224-5d71ec64d049
 )
