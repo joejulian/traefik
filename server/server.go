@@ -527,8 +527,7 @@ func (s *Server) startServer(serverEntryPoint *serverEntryPoint) {
 
 	var err error
 	if serverEntryPoint.httpServer.TLSConfig != nil {
-		err = serverEntryPoint.httpServer.ServeTLSViaSPDYorHTTP2(serverEntryPoint.listener)
-		//err = serverEntryPoint.httpServer.ServeTLS(serverEntryPoint.listener, "", "")
+		err = serverEntryPoint.httpServer.ServeTLS(serverEntryPoint.listener, "", "")
 	} else {
 		err = serverEntryPoint.httpServer.Serve(serverEntryPoint.listener)
 	}
